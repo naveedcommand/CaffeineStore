@@ -1,0 +1,89 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: auto;
+  width: 50%;
+  padding-top: 50px;
+}
+
+.welHeading {
+  text-align: center;
+  font-weight: 700;
+  font-size: 50px;
+  margin-bottom: 30px;
+}
+
+.authFormConatainer {
+  align-items: center;
+  margin: auto;
+  width: 50%;
+}
+
+form {
+  margin-top: 100px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 50px 0;
+  box-sizing: border-box;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  display: block;
+  border: none;
+  border-bottom: 2px solid black;
+  font-size: 20px;
+}
+
+
+input[type=submit] {
+  border: none;
+  background-color: red;
+  color: white;
+  font-size: 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+.responseContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 140px;
+  /* background-color: red; */
+  padding: 20px 40px;
+  border-radius: 20px;
+  border: 2px solid grey;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+.resDataContainer {
+  margin-right: 20px;
+  width: 50%;
+}
+
+.resDataForm {
+  width: 50%;
+}
+
+.resDataHeading {
+  margin-bottom: 20px;
+  font-size: 40px;
+}
+
+.resDataContent {
+  margin-top: 20px;
+}
+
+span {
+  margin-right: 20px;
+  font-size: 23px;
+  font-weight: 600;
+}
