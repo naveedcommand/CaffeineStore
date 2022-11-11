@@ -9,6 +9,7 @@ export default function Index() {
     const [mg, setMg] = useState()
     const [data, setData] = useState()
     const [refreshing, setRefreshing] = useState(false)
+    const [errMessage, setErrMessage] = useState()
     const BASE_URL = "http://localhost:8000/api"
     useEffect(() => {
         const user = localStorage.getItem("userEmail")
@@ -51,18 +52,26 @@ export default function Index() {
                     localStorage.setItem("userEmail", email)
                     setUser(true)
                 }
-                console.log(res.data);
             }).catch((err) => console.log(err))
         }
     }
     const dataCreate = async (e) => {
-        e.preventDefault();
-        axios.post(`${BASE_URL}/data/create`, { drinkName, userEmail: user, }).then((res) => {
-            alert(`${res.data.message}`)
-            setRefreshing(!refreshing)
-        })
+        if (e.value !== null) {
+            if (e.limit > e.value) {
+                setErrMessage("Consumed limit reached")
+            }
+            else {
+                axios.post(`${BASE_URL}/data/create`, { drinkName, userEmail: user, }).then((res) => {
+                    alert(`${res.data.message}`)
+                    setRefreshing(!refreshing)
+                })
+            }
+        }
+        else {
+            setErrMessage("Please select drink")
+        }
+
     }
-    console.log(data);
     return (
         <div className='container'>
             {/* Welcome Heading  */}
@@ -88,33 +97,43 @@ export default function Index() {
                             <div className='resData'>
                                 <div className='resDataContent'>
                                     <span>Monster Ultra Sunrise:</span>
-                                    <span>{`${data?.monster} mg`}</span>
+                                    <span>{`${data?.monster !== undefined ? data?.monster : 0} mg`}</span>
                                 </div>
                                 <div className='resDataContent'>
                                     <span>Black Coffee:</span>
-                                    <span>{`${data?.black} mg`}</span>
+                                    <span>{`${data?.black !== undefined ? data?.black : 0} mg`}</span>
 
                                 </div>
                                 <div className='resDataContent'>
                                     <span>Americano:</span>
-                                    <span>{`${data?.americano} mg`}</span>
+                                    <span>{`${data?.americano !== undefined ? data?.americano : 0} mg`}</span>
 
                                 </div>
                                 <div className='resDataContent'>
                                     <span>Sugar free NOS:</span>
-                                    <span>{`${data?.sugar} mg`}</span>
+                                    <span>{`${data?.sugar !== undefined ? data?.sugar : 0} mg`}</span>
 
                                 </div>
                                 <div className='resDataContent'>
                                     <span>5 Hour Energy</span>
-                                    <span>{`${data?.energy} mg`}</span>
+                                    <span>{`${data?.energy !== undefined ? data?.energy : 0} mg`}</span>
 
                                 </div>
 
                             </div>
                         </div>
                         <div className='resDataForm'>
-                            <form action="" onSubmit={dataCreate}>
+                            <form action="" onSubmit={(e) => {
+                                e.preventDefault()
+                                dataCreate(
+                                    drinkName == "monster" ? { value: 500 - data?.monster, limit: 75 } :
+                                        drinkName == "black" ? { value: 500 - data?.black, limit: 95 } :
+                                            drinkName == "americano" ? { value: 500 - data?.americano, limit: 77 } :
+                                                drinkName == "sugar" ? { value: 500 - data?.sugar, limit: 130 } :
+                                                    drinkName == "energy" ? { value: 500 - data?.energy, limit: 200 } : null
+
+                                )
+                            }}>
                                 <select name="" id="" onChange={(e) => setDrinkName(e.target.value)}>
                                     <option value="monster">Monster Ultra Sunrise</option>
                                     <option value="black">Black Coffee</option>
@@ -125,21 +144,40 @@ export default function Index() {
                                 {/* <input type="text" placeholder='Total mg' onChange={(e) => setMg(e.target.value)} /> */}
                                 {
                                     drinkName == "monster" ?
-                                        <p>Total Capacity: {500 - data?.monster}</p>
+                                        <div>
+                                            <p>Total Capacity: {500 - data?.monster == null ? 500 : 500 - data?.monster}</p>
+                                            <p>Total Consumed: {data?.monster}</p>
+                                        </div>
                                         :
                                         drinkName == "black" ?
-                                            <p>Total Capacity: {500 - data?.black}</p>
+                                            <div>
+                                                <p>Total Capacity: {500 - data?.black == null ? 500 : 500 - data?.black}</p>
+                                                <p>Total Consumed: {data?.black}</p>
+                                            </div>
                                             :
                                             drinkName == "americano" ?
-                                                <p>Total Capacity: {500 - data?.americano}</p>
+                                                <div>
+                                                    <p>Total Capacity: {500 - data?.americano == null ? 500 : 500 - data?.americano}</p>
+                                                    <p>Total Consumed: {data?.americano}</p>
+                                                </div>
                                                 :
                                                 drinkName == "sugar" ?
-                                                    <p>Total Capacity: {500 - data?.sugar}</p>
+                                                    <div>
+                                                        <p>Total Capacity: {500 - data?.sugar == null ? 500 : 500 - data?.sugar}</p>
+                                                        <p>Total Consumed: {data?.sugar}</p>
+                                                    </div>
                                                     :
                                                     drinkName == "energy" ?
-                                                        <p>Total Capacity: {500 - data?.energy}</p>
+                                                        <div>
+                                                            <p>Total Capacity: {500 - data?.energy == null ? 500 : 500 - data?.energy}</p>
+                                                            <p>Total Consumed: {data?.energy}</p>
+                                                        </div>
                                                         :
                                                         null
+                                }
+                                {
+                                    errMessage !== undefined ?
+                                        <p style={{ color: 'red' }}>{errMessage}</p> : null
                                 }
                                 <input type="submit" value={"Consumed"} />
                             </form>
