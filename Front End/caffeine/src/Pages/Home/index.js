@@ -11,27 +11,26 @@ export default function Index() {
     const [refreshing, setRefreshing] = useState(false)
     const [errMessage, setErrMessage] = useState()
     const BASE_URL = "http://localhost:8000/api"
-    useEffect(() => {
-        const user = localStorage.getItem("userEmail")
-        setUser(user)
-        axios.get(`${BASE_URL}/data/get`, {
+
+    const getData = async (user) => {
+        await axios.get(`${BASE_URL}/data/get`, {
             headers: {
                 email: user
             }
-        }).then((res) => { setData(res.data.data) })
-        console.log(data);
+        }).then((res) => {
+            setData(res.data.data)
+        })
+    }
+    useEffect(() => {
+        const user = localStorage.getItem("userEmail")
+        setUser(user)
+        getData(user)
     }, [])
     useEffect(() => {
         const user = localStorage.getItem("userEmail")
         setUser(user)
-        axios.get(`${BASE_URL}/data/get`, {
-            headers: {
-                email: user
-            }
-        }).then((res) => { setData(res.data.data) })
-        console.log(data);
-
-    }, [refreshing])
+        getData(user)
+    }, [refreshing, drinkName])
     const auth = (e) => {
         e.preventDefault();
         if (!name) {
@@ -47,6 +46,8 @@ export default function Index() {
             axios.post(`${BASE_URL}/auth`, { name, email, age }).then((res) => {
                 if (res.data.message == "Email is already registered") {
                     alert(res.data.message)
+                    setRefreshing(!refreshing)
+                    window.location.reload(false);
                 }
                 else {
                     localStorage.setItem("userEmail", email)
@@ -56,15 +57,21 @@ export default function Index() {
         }
     }
     const dataCreate = async (e) => {
-        if (e.value !== null) {
-            if (e.limit > e.value) {
-                setErrMessage("Consumed limit reached")
+        if (e !== null) {
+            if (data?.monster + data?.black + data?.americano + data?.sugar + data?.energy + e.limit <= 500) {
+                if (data?.monster + data?.black + data?.americano + data?.sugar + data?.energy <= 500) {
+                    setErrMessage("")
+                    axios.post(`${BASE_URL}/data/create`, { drinkName, userEmail: user, }).then((res) => {
+                        alert(`${res.data.message}`)
+                        setRefreshing(!refreshing)
+                    })
+                }
+                else {
+                    setErrMessage("Consumed limit reached")
+                }
             }
             else {
-                axios.post(`${BASE_URL}/data/create`, { drinkName, userEmail: user, }).then((res) => {
-                    alert(`${res.data.message}`)
-                    setRefreshing(!refreshing)
-                })
+                setErrMessage("Consumed limit reached")
             }
         }
         else {
@@ -72,6 +79,7 @@ export default function Index() {
         }
 
     }
+    console.log(data);
     return (
         <div className='container'>
             {/* Welcome Heading  */}
@@ -142,39 +150,10 @@ export default function Index() {
                                     <option value="energy">5 Hour Energy</option>
                                 </select>
                                 {/* <input type="text" placeholder='Total mg' onChange={(e) => setMg(e.target.value)} /> */}
-                                {
-                                    drinkName == "monster" ?
-                                        <div>
-                                            <p>Total Capacity: {500 - data?.monster == null ? 500 : 500 - data?.monster}</p>
-                                            <p>Total Consumed: {data?.monster}</p>
-                                        </div>
-                                        :
-                                        drinkName == "black" ?
-                                            <div>
-                                                <p>Total Capacity: {500 - data?.black == null ? 500 : 500 - data?.black}</p>
-                                                <p>Total Consumed: {data?.black}</p>
-                                            </div>
-                                            :
-                                            drinkName == "americano" ?
-                                                <div>
-                                                    <p>Total Capacity: {500 - data?.americano == null ? 500 : 500 - data?.americano}</p>
-                                                    <p>Total Consumed: {data?.americano}</p>
-                                                </div>
-                                                :
-                                                drinkName == "sugar" ?
-                                                    <div>
-                                                        <p>Total Capacity: {500 - data?.sugar == null ? 500 : 500 - data?.sugar}</p>
-                                                        <p>Total Consumed: {data?.sugar}</p>
-                                                    </div>
-                                                    :
-                                                    drinkName == "energy" ?
-                                                        <div>
-                                                            <p>Total Capacity: {500 - data?.energy == null ? 500 : 500 - data?.energy}</p>
-                                                            <p>Total Consumed: {data?.energy}</p>
-                                                        </div>
-                                                        :
-                                                        null
-                                }
+                                <div>
+                                    <p>Total Capacity: 500</p>
+                                    <p>Total Consumed: {isNaN(data?.monster + data?.black + data?.americano + data?.sugar + data?.energy) === true ? 0 : data?.monster + data?.black + data?.americano + data?.sugar + data?.energy}</p>
+                                </div>
                                 {
                                     errMessage !== undefined ?
                                         <p style={{ color: 'red' }}>{errMessage}</p> : null
