@@ -2,8 +2,9 @@ const dataSchema = require("../../models/data")
 
 const create = (req, res) => {
     const { drinkName } = req.body
-    dataSchema.findOne({ email: req.body.email }).then(async (data) => {
-        await dataSchema.findByIdAndUpdate({ _id: data._id }, drinkName == "monster" ? { monster: data.monster + Number(75) } : drinkName == "black" ? { black: data.black + Number(75) } : drinkName == "americano" ? { americano: data.americano + Number(75) } : drinkName == "sugar" ? { sugar: data.sugar + Number(75) } : drinkName == "energy" ? { energy: data.energy + Number(75) } : null).then(() => {
+    console.log(drinkName);
+    dataSchema.findOne({ userEmail: req.body.userEmail }).then(async (data) => {
+        await dataSchema.findByIdAndUpdate({ _id: data._id }, drinkName == "monster" ? { monster: Number(data.monster) + Number(75) } : drinkName == "black" ? { black: Number(data.black) + Number(95) } : drinkName == "americano" ? { americano: Number(data.americano) + Number(77) } : drinkName == "sugar" ? { sugar: Number(data.sugar) + Number(130) } : drinkName == "energy" ? { energy: Number(data.energy) + Number(200) } : null, { new: true }).then((data) => {
             res.status(200).send({
                 message: "Data Stored"
             })
