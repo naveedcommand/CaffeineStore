@@ -6,7 +6,7 @@ const dataSchema = mongoose.model("data", mongoose.Schema({
     americano: { type: Number },
     sugar: { type: Number },
     energy: { type: Number },
-    userEmail: { type: String },
+    userId: { type: String },
 },
     { timestamps: true }
 ))

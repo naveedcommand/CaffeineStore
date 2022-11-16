@@ -19,11 +19,15 @@
 .authFormConatainer {
   align-items: center;
   margin: auto;
-  width: 50%;
+  width: 100%;
+  display: flex;
+
 }
 
 form {
   margin-top: 100px;
+  width: 50%;
+  margin: 20px;
 }
 
 input,

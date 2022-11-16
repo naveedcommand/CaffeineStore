@@ -3,31 +3,31 @@ import axios from 'axios'
 export default function Index() {
     const [name, setName] = useState()
     const [email, setEmail] = useState()
-    const [age, setAge] = useState()
+    const [password, setPassword] = useState()
     const [user, setUser] = useState(false)
     const [drinkName, setDrinkName] = useState()
-    const [mg, setMg] = useState()
     const [data, setData] = useState()
     const [refreshing, setRefreshing] = useState(false)
     const [errMessage, setErrMessage] = useState()
     const BASE_URL = "http://localhost:8000/api"
 
-    const getData = async (user) => {
+    const getData = async (token) => {
         await axios.get(`${BASE_URL}/data/get`, {
             headers: {
-                email: user
+                token: token
             }
         }).then((res) => {
+            console.log(res.data);
             setData(res.data.data)
         })
     }
     useEffect(() => {
-        const user = localStorage.getItem("userEmail")
+        const user = localStorage.getItem("token")
         setUser(user)
         getData(user)
     }, [])
     useEffect(() => {
-        const user = localStorage.getItem("userEmail")
+        const user = localStorage.getItem("token")
         setUser(user)
         getData(user)
     }, [refreshing, drinkName])
@@ -39,18 +39,18 @@ export default function Index() {
         else if (!email) {
             alert("Enter email address")
         }
-        else if (!age) {
-            alert("Enter your age")
+        else if (!password) {
+            alert("Enter password")
         }
         else {
-            axios.post(`${BASE_URL}/auth`, { name, email, age }).then((res) => {
+            axios.post(`${BASE_URL}/auth/register`, { name, email, password }).then((res) => {
                 if (res.data.message == "Email is already registered") {
                     alert(res.data.message)
                     setRefreshing(!refreshing)
                     window.location.reload(false);
                 }
                 else {
-                    localStorage.setItem("userEmail", email)
+                    localStorage.setItem("token", res.data.token)
                     setUser(true)
                 }
             }).catch((err) => console.log(err))
@@ -61,7 +61,7 @@ export default function Index() {
             if (data?.monster + data?.black + data?.americano + data?.sugar + data?.energy + e.limit <= 500) {
                 if (data?.monster + data?.black + data?.americano + data?.sugar + data?.energy <= 500) {
                     setErrMessage("")
-                    axios.post(`${BASE_URL}/data/create`, { drinkName, userEmail: user, }).then((res) => {
+                    axios.post(`${BASE_URL}/data/create`, { drinkName, userId: user, }).then((res) => {
                         alert(`${res.data.message}`)
                         setRefreshing(!refreshing)
                     })
@@ -77,9 +77,36 @@ export default function Index() {
         else {
             setErrMessage("Please select drink")
         }
-
     }
-    console.log(data);
+    const login = async (e) => {
+        e.preventDefault();
+        if (!name) {
+            alert("Enter your name")
+        }
+        else if (!email) {
+            alert("Enter email address")
+        }
+        else if (!password) {
+            alert("Enter password")
+        }
+        else {
+            axios.post(`${BASE_URL}/auth/login`, { name, email, password }).then((res) => {
+                if (res.data.message == "Email is not registered") {
+                    alert(res.data.message)
+                    setRefreshing(!refreshing)
+                    window.location.reload(false);
+                }
+                else {
+                    localStorage.setItem("token", res.data.token)
+                    setUser(true)
+                    setRefreshing(!refreshing)
+                }
+            }).catch((err) => console.log(err))
+        }
+    }
+    const logout = async () => {
+        await localStorage.removeItem("token")
+    }
     return (
         <div className='container'>
             {/* Welcome Heading  */}
@@ -93,8 +120,14 @@ export default function Index() {
                         <form onSubmit={auth}>
                             <input onChange={(e) => setName(e.target.value)} type="text" className='nameInput' placeholder='Your Name' />
                             <input onChange={(e) => setEmail(e.target.value)} type="text" className='emailInput' placeholder='Email Address' />
-                            <input onChange={(e) => setAge(e.target.value)} type="text" className='ageInput' placeholder='Your Age' />
+                            <input onChange={(e) => setPassword(e.target.value)} type="text" className='ageInput' placeholder='Password' />
                             <input type="submit" className='authBtn' value='Register Now' />
+                        </form>
+                        <form onSubmit={login}>
+                            <input onChange={(e) => setName(e.target.value)} type="text" className='nameInput' placeholder='Your Name' />
+                            <input onChange={(e) => setEmail(e.target.value)} type="text" className='emailInput' placeholder='Email Address' />
+                            <input onChange={(e) => setPassword(e.target.value)} type="text" className='ageInput' placeholder='Password' />
+                            <input type="submit" className='authBtn' value='Login' />
                         </form>
                     </div>
                     :
@@ -134,10 +167,10 @@ export default function Index() {
                             <form action="" onSubmit={(e) => {
                                 e.preventDefault()
                                 dataCreate(
-                                    drinkName == "monster" ? { value: 500 - data?.monster, limit: 75 } :
+                                    drinkName == "monster" ? { value: 500 - data?.monster, limit: 150 } :
                                         drinkName == "black" ? { value: 500 - data?.black, limit: 95 } :
                                             drinkName == "americano" ? { value: 500 - data?.americano, limit: 77 } :
-                                                drinkName == "sugar" ? { value: 500 - data?.sugar, limit: 130 } :
+                                                drinkName == "sugar" ? { value: 500 - data?.sugar, limit: 260 } :
                                                     drinkName == "energy" ? { value: 500 - data?.energy, limit: 200 } : null
 
                                 )
@@ -149,7 +182,6 @@ export default function Index() {
                                     <option value="sugar">Sugar free NOS</option>
                                     <option value="energy">5 Hour Energy</option>
                                 </select>
-                                {/* <input type="text" placeholder='Total mg' onChange={(e) => setMg(e.target.value)} /> */}
                                 <div>
                                     <p>Total Capacity: 500</p>
                                     <p>Total Consumed: {isNaN(data?.monster + data?.black + data?.americano + data?.sugar + data?.energy) === true ? 0 : data?.monster + data?.black + data?.americano + data?.sugar + data?.energy}</p>
@@ -160,18 +192,12 @@ export default function Index() {
                                 }
                                 <input type="submit" value={"Consumed"} />
                             </form>
+                            <form action="" onSubmit={logout}>
+                                <input type="submit" value={"Logout"} />
+                            </form>
                         </div>
                     </div>
             }
-
-
-
-
-
-
-
-            {/* Footer  */}
-            <div></div>
         </div >
     )
 }
